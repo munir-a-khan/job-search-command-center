@@ -18,15 +18,15 @@
 
 | Dashboard | Profile — Resume Upload |
 |:---------:|:-----------------------:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Profile](docs/screenshots/profile.png) |
+| ![Dashboard](dashboard.png) | ![Profile](profile.png) |
 
 | Job Descriptions — URL auto-fetch | Application Detail — Generate |
 |:---------------------------------:|:-----------------------------:|
-| ![Job Descriptions](docs/screenshots/jds.png) | ![Application](docs/screenshots/application-detail.png) |
+| ![Job Descriptions](jds.png) | ![Application](application-detail.png) |
 
 | Applications tracker | Claude-tailored resume (PDF output) |
 |:--------------------:|:------------------------------------:|
-| ![Applications](docs/screenshots/applications.png) | ![Resume PDF](docs/screenshots/resume-pdf.png) |
+| ![Applications](applications.png) | ![Resume PDF](resume-pdf.png) |
 
 ---
 
@@ -146,27 +146,6 @@ Swap them out without touching the rest of the stack — the LaTeX templates are
 - `.env` is `.gitignore`d — no secrets in source control.
 
 ---
-
-## Adding screenshots
-
-After cloning and running `docker compose up --build`, open the app and take screenshots of each page. Save them into `docs/screenshots/` with these exact filenames:
-
-```
-docs/screenshots/dashboard.png
-docs/screenshots/profile.png
-docs/screenshots/jds.png
-docs/screenshots/applications.png
-docs/screenshots/application-detail.png
-docs/screenshots/resume-pdf.png
-```
-
-Then:
-
-```bash
-git add docs/screenshots/
-git commit -m "Add screenshots"
-git push
-```
 
 ---
 

@@ -4,7 +4,7 @@
 ![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![React Router 6](https://img.shields.io/badge/React_Router-6-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white)
-![Node 20 Alpine](https://img.shields.io/badge/Node-20_alpine-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Node 20 Alpine](https://img.shields.io/badge/Node-20_alpine-339933?style=flat-square)
 
 A small single-page React app that drives the backend over `/api/*`. It's intentionally library-light: no Redux, no Tailwind, no UI kit — just React Router, plain CSS, and `fetch`.
 

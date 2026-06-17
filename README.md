@@ -2,16 +2,16 @@
 
 > A fully dockerized, **AI-powered** web app for running an entire job hunt end-to-end — pasting postings, tailoring resumes, drafting cover letters, and tracking the pipeline. Built around the **Claude API** as the engine for every language task.
 
-![Claude Sonnet 4.6](https://img.shields.io/badge/Claude-Sonnet_4.6-D97757?style=for-the-badge&logo=anthropic&logoColor=white)
+![Claude Sonnet 4.6](https://img.shields.io/badge/Claude-Sonnet_4.6-D97757?style=for-the-badge)
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-blue?style=for-the-badge&logo=docker&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-![Tectonic LaTeX](https://img.shields.io/badge/Tectonic-LaTeX-008080?style=for-the-badge&logo=overleaf&logoColor=white)
+![Tectonic LaTeX](https://img.shields.io/badge/Tectonic-LaTeX-008080?style=for-the-badge)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
-![23 tests passing](https://img.shields.io/badge/tests-23_passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
+![23 tests passing](https://img.shields.io/badge/tests-23_passing-brightgreen?style=for-the-badge)
 
 ---
 

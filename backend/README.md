@@ -4,10 +4,10 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat-square&logo=sqlalchemy&logoColor=white)
 ![Pydantic 2](https://img.shields.io/badge/Pydantic-2-E92063?style=flat-square&logo=pydantic&logoColor=white)
-![Claude Sonnet 4.6](https://img.shields.io/badge/Claude-Sonnet_4.6-D97757?style=flat-square&logo=anthropic&logoColor=white)
-![Tectonic LaTeX](https://img.shields.io/badge/Tectonic-LaTeX-008080?style=flat-square&logo=overleaf&logoColor=white)
+![Claude Sonnet 4.6](https://img.shields.io/badge/Claude-Sonnet_4.6-D97757?style=flat-square)
+![Tectonic LaTeX](https://img.shields.io/badge/Tectonic-LaTeX-008080?style=flat-square)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
-![pytest 23 passing](https://img.shields.io/badge/pytest-23_passing-brightgreen?style=flat-square&logo=pytest&logoColor=white)
+![pytest 23 passing](https://img.shields.io/badge/pytest-23_passing-brightgreen?style=flat-square)
 
 The backend is a single FastAPI app. Its job is to:
 

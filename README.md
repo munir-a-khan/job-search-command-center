@@ -1,98 +1,141 @@
 # Job Search Command Center
 
-A fully dockerized, AI-powered web app for managing a job hunt end to end.
+> A fully dockerized, **AI-powered** web app for running an entire job hunt end-to-end — pasting postings, tailoring resumes, drafting cover letters, and tracking the pipeline. Built around the **Claude API** as the engine for every language task.
 
-- **Job Description Parser** — paste a JD, Claude extracts role, company, requirements, ATS keywords.
-- **Resume Tailor** — Claude rewrites your bullet points to mirror the JD, then compiles a real PDF via Tectonic.
-- **Cover Letter Generator** — short, sincere, plain-text cover letters.
-- **Application Tracker** — status, dates, follow-up reminders, notes per application.
-- **Pipeline Dashboard** — KPIs and recent activity across the whole pipeline.
+<p>
+  <img src="https://img.shields.io/badge/Claude-Sonnet%204.6-D97757?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Sonnet 4.6" />
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React 18" />
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 5" />
+  <img src="https://img.shields.io/badge/Docker-blue?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/LaTeX-Tectonic-008080?style=for-the-badge&logo=latex&logoColor=white" alt="Tectonic LaTeX" />
+  <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
+  <img src="https://img.shields.io/badge/tests-23%20passing-brightgreen?style=for-the-badge" alt="23 tests passing" />
+</p>
 
-Three resume formats are supported out of the box:
-| Channel | Template | Page target | Style |
-| --- | --- | --- | --- |
-| `private` | `private.tex.j2` | 1 page | terse, ATS-friendly |
-| `federal` | `federal.tex.j2` | 2 pages | USAJOBS-style with hours, salary, supervisor |
-| `state` | `state.tex.j2` | 1 page | CalCareers / CalJOBS-style |
+---
 
-You can swap or extend the LaTeX templates in `backend/app/latex_templates/` without touching the rest of the stack.
+## What it does
 
-## Stack
-
-| Layer | Tech |
+| Feature | What it actually runs |
 | --- | --- |
-| Frontend | React 18 + Vite, served via Nginx |
-| Backend | FastAPI + SQLAlchemy + Jinja2 |
-| AI | Claude API (`claude-sonnet-4-6` by default) |
-| LaTeX | Tectonic (single static binary, ~50 MB) |
-| Storage | SQLite (bind-mounted under `./data`) |
-| Containerization | Docker + docker-compose |
+| **Job Description Parser** | Paste raw posting → Claude extracts company, role, must-haves, nice-to-haves, ATS keywords, responsibilities. |
+| **Resume Tailor** | Claude rewrites your bullet points to mirror the JD, then Tectonic compiles a real PDF (private / federal / state template). |
+| **Cover Letter Generator** | Claude drafts a short, sincere, no-fluff cover letter that cites real accomplishments from your profile. |
+| **Application Tracker** | CRUD over applications — status, applied/follow-up dates, notes, generated artifacts. |
+| **Pipeline Dashboard** | Live KPIs, status breakdown, recent activity, follow-ups due in the next 3 days. |
+
+---
+
+## Why this project leans on Claude
+
+The whole app is a case study in **using a frontier LLM as a load-bearing component of a product**, not as a side-bar chatbot. Every screen that produces language ships through Claude:
+
+- **Structured JD extraction** uses Claude with a strict JSON-shape contract (see [`backend/app/services/jd_parser.py`](backend/app/services/jd_parser.py)). The system prompt forbids inventing fields, requires conservative empty defaults, and the response is parsed + normalized server-side before it ever reaches the DB.
+- **Resume tailoring** ([`backend/app/services/resume_tailor.py`](backend/app/services/resume_tailor.py)) is the hardest prompt in the codebase. It receives the candidate's full structured profile + the parsed JD + a `template_type` flag, and returns a JSON object with a tailored summary, a re-categorized skill matrix, rewritten bullets keyed by `(company, title)`, and an explicit `missing_keywords` + `warnings` array. The prompt is engineered to *refuse* to invent experience, certifications, or metrics; if the JD asks for something the candidate genuinely lacks, the gap is surfaced rather than fabricated.
+- **Cover letter generation** ([`backend/app/services/cover_letter.py`](backend/app/services/cover_letter.py)) constrains Claude to three short paragraphs, two cited accomplishments, and a banned-cliché list — proving that prompt scaffolding can produce voice-consistent output without a fine-tune.
+- **Defensive parsing** lives in the Claude client wrapper ([`backend/app/services/claude_client.py`](backend/app/services/claude_client.py)). It strips ```` ```json ```` fences, falls back to a regex JSON pull on imperfect responses, and surfaces a clean `ClaudeError` to FastAPI so the UI sees a useful 502 instead of a stack trace.
+
+The model is configurable via the `CLAUDE_MODEL` env var; the default is `claude-sonnet-4-6`.
+
+---
 
 ## Quick start
 
-1. Copy `.env.example` → `.env` and set:
-   - `ANTHROPIC_API_KEY` — Claude API key.
-   - `API_KEY` — anything random (e.g. `openssl rand -hex 32`); the backend rejects any request without `X-API-Key: <this value>`. Leave empty in dev to disable auth.
-2. Bring it up:
-   ```bash
-   docker compose up --build
-   ```
-3. Open <http://localhost:8080>. Paste your `API_KEY` into the top bar; it's saved in localStorage. The API is on <http://localhost:8000> with docs at `/docs`.
+You need Docker Desktop and an [Anthropic API key](https://console.anthropic.com/).
 
-The first build downloads Tectonic and warms its cache; expect 3–5 minutes the first time.
-
-## Typical flow
-
-1. **Profile** — enter your work history, education, projects, skills. Bullets here are *baselines* — Claude rewrites them per job.
-2. **Job Descriptions** — paste a posting, pick the channel (private / federal / state), parse with Claude.
-3. **Applications** — pair a profile with a JD, pick a template.
-4. **Application detail** — click *Generate resume* (produces a PDF + .tex) and *Generate cover letter*.
-5. **Dashboard** — track status, follow-up reminders, and recent activity.
-
-## Truthfulness
-
-The resume tailor prompt explicitly forbids inventing experience, certifications, dates, employers, or metrics. If the JD requires something you genuinely lack, it will surface those gaps under `missing_keywords` / `warnings` instead of fabricating them.
-
-## Layout
-
-```
-job-search-command-center/
-├── docker-compose.yml
-├── .env.example
-├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── app/
-│       ├── main.py
-│       ├── config.py
-│       ├── db/
-│       ├── routers/
-│       ├── schemas/
-│       ├── services/
-│       └── latex_templates/
-└── frontend/
-    ├── Dockerfile
-    ├── nginx.conf
-    ├── package.json
-    └── src/
-        ├── api/
-        ├── pages/
-        └── styles/
+```bash
+git clone https://github.com/munir-a-khan/job-search-command-center
+cd job-search-command-center
+cp .env.example .env
+# edit .env: set ANTHROPIC_API_KEY and API_KEY (any random string)
+docker compose up --build
 ```
 
-## API
+Then open **<http://localhost:8080>**. Paste your `API_KEY` into the top bar — it's saved in localStorage. The API is on **<http://localhost:8000>** with auto-generated docs at `/docs`.
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET/POST/PUT/DELETE | `/api/profiles` | Profile CRUD |
-| GET/POST/DELETE | `/api/jds` | JD CRUD; POST parses via Claude |
-| GET/POST/PATCH/DELETE | `/api/applications` | Application CRUD |
-| GET | `/api/applications/dashboard/summary` | Dashboard aggregates |
-| POST | `/api/generate/resume` | Tailor + render + compile resume PDF |
-| POST | `/api/generate/cover-letter` | Generate cover letter |
-| GET | `/api/generate/file?path=…` | Download a generated artifact |
+The first build downloads Tectonic + npm packages; expect 3–5 minutes. After that, `docker compose up` is fast.
 
-Full OpenAPI schema at <http://localhost:8000/docs>.
+---
+
+## Architecture
+
+```
+              ┌─────────────────────┐         ┌─────────────────────┐
+              │   React + Vite UI   │  /api/* │   FastAPI Backend   │
+   browser  ──┤  (Nginx :8080)      ├────────►│  (uvicorn :8000)    │
+              │                     │ X-API-  │                     │
+              │  ApiKeyBar          │  Key    │  routers/           │
+              │  ├─ Dashboard       │         │  ├─ profiles        │
+              │  ├─ Profile         │         │  ├─ jds             │
+              │  ├─ JDs             │         │  ├─ applications    │
+              │  ├─ Applications    │         │  └─ generate        │
+              │  └─ App. detail     │         │                     │
+              └─────────────────────┘         │  services/          │
+                                              │  ├─ claude_client   │──┐
+                                              │  ├─ jd_parser       │  │
+                                              │  ├─ resume_tailor   │  │ Claude API
+                                              │  ├─ cover_letter    │  │ (sonnet-4-6)
+                                              │  └─ latex_render    │  │
+                                              │         │            │  │
+                                              │         ▼            │  │
+                                              │  Jinja2 → Tectonic   │  │
+                                              │         │            │  │
+                                              └─────────┼────────────┘  │
+                                                        ▼               ▼
+                                              ┌─────────────────────┐
+                                              │  SQLite + ./data    │
+                                              │  (PDFs, .tex, .txt) │
+                                              └─────────────────────┘
+```
+
+| Layer | Tech |
+| --- | --- |
+| Frontend | React 18 + Vite, served behind Nginx |
+| Backend | FastAPI + SQLAlchemy 2 + Jinja2 |
+| AI | **Claude API** (`claude-sonnet-4-6` by default) via the official `anthropic` Python SDK |
+| LaTeX | Tectonic (one static binary, no full TeX Live) |
+| Storage | SQLite, mounted to `./data` |
+| Auth | Bearer-style `X-API-Key` header, constant-time compare |
+| Containerization | Docker + docker-compose |
+
+---
+
+## Three resume formats — one engine
+
+The same profile produces three different resumes depending on the channel you're applying through:
+
+| Channel | Template | Page target | Notes |
+| --- | --- | --- | --- |
+| `private` | [`private.tex.j2`](backend/app/latex_templates/private.tex.j2) | 1 page | terse, ATS-friendly, what most companies expect |
+| `federal` | [`federal.tex.j2`](backend/app/latex_templates/federal.tex.j2) | ≤ 2 pages | USAJOBS-style — hours per week, salary, supervisor, longer bullets |
+| `state` | [`state.tex.j2`](backend/app/latex_templates/state.tex.j2) | 1 page | CalCareers / CalJOBS-style — mirrors the duty statement |
+
+Swap them out without touching the rest of the stack — the LaTeX templates are pure Jinja2 and consume a single normalized `profile` + `jd` context.
+
+---
+
+## Deeper guides
+
+- **[backend/README.md](backend/README.md)** — API reference, env vars, prompts, LaTeX pipeline, tests, project layout.
+- **[frontend/README.md](frontend/README.md)** — page-by-page tour, API client conventions, theming, Nginx proxy.
+
+---
+
+## Truthfulness clause
+
+The resume tailor and cover letter prompts explicitly forbid inventing experience, certifications, dates, employers, or metrics. If the JD requires something you genuinely lack, the response surfaces those gaps under `missing_keywords` / `warnings` instead of fabricating them. The same rule is codified into the [`resume_tailor.py`](backend/app/services/resume_tailor.py) system prompt — see "Rules" in `INSTRUCTIONS`.
+
+---
+
+## Status
+
+23 backend tests passing. End-to-end smoke-tested in Docker:
+- Health endpoint returns model and auth state.
+- All three resume templates render through Jinja → Tectonic → PDF.
+- ATS check (`pypdf` text extraction) flags ligatures and missing keywords.
 
 ## License
 

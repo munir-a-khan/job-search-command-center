@@ -6,6 +6,7 @@ from ..db import models
 from ..schemas.models import JDCreate, JDOut
 from ..services.jd_parser import parse_jd
 from ..services.claude_client import ClaudeError
+from ..services.url_scraper import fetch_jd_text, ScraperError
 
 router = APIRouter(prefix="/api/jds", tags=["job-descriptions"])
 
@@ -18,15 +19,25 @@ def list_jds(db: Session = Depends(get_db)):
 @router.post("", response_model=JDOut)
 def create_jd(payload: JDCreate, db: Session = Depends(get_db)):
     raw = (payload.raw_text or "").strip()
+    url = (payload.posting_url or "").strip()
+
+    # Auto-fetch from URL when no raw text provided
     if not raw:
-        raise HTTPException(400, "raw_text is required")
+        if not url:
+            raise HTTPException(400, "Provide raw_text or a posting_url to scrape")
+        try:
+            raw = fetch_jd_text(url)
+        except ScraperError as e:
+            raise HTTPException(422, f"URL scrape failed: {e}")
+
     try:
         parsed = parse_jd(raw, source=payload.source)
     except ClaudeError as e:
         raise HTTPException(502, f"Claude parse failed: {e}")
+
     obj = models.JobDescription(
         raw_text=raw,
-        posting_url=payload.posting_url,
+        posting_url=url,
         source=payload.source,
         parsed=parsed,
         company=parsed.get("company", ""),

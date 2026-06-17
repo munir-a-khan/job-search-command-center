@@ -1,11 +1,17 @@
 const base = "";
 const API_KEY_STORAGE = "jscc_api_key";
 
+// Auto-load from Vite env (set VITE_API_KEY in .env to match backend API_KEY)
+const ENV_KEY = import.meta.env.VITE_API_KEY || "";
+
 export function getApiKey() {
-  try { return localStorage.getItem(API_KEY_STORAGE) || ""; } catch { return ""; }
+  try { return localStorage.getItem(API_KEY_STORAGE) || ENV_KEY; } catch { return ENV_KEY; }
 }
 export function setApiKey(v) {
   try { localStorage.setItem(API_KEY_STORAGE, v || ""); } catch {}
+}
+export function clearStoredKey() {
+  try { localStorage.removeItem(API_KEY_STORAGE); } catch {}
 }
 
 function authHeaders() {
@@ -28,6 +34,23 @@ async function req(path, opts = {}) {
     throw new Error(`${res.status}: ${msg}`);
   }
   if (res.status === 204) return null;
+  return res.json();
+}
+
+async function uploadFile(path, formData) {
+  const k = getApiKey();
+  const res = await fetch(base + path, {
+    method: "POST",
+    headers: k ? { "X-API-Key": k } : {},
+    body: formData,
+  });
+  if (res.status === 401) throw new Error("401: API key required or invalid.");
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = text;
+    try { msg = JSON.parse(text).detail || text; } catch {}
+    throw new Error(`${res.status}: ${msg}`);
+  }
   return res.json();
 }
 
@@ -58,6 +81,11 @@ export const api = {
   createProfile: (data) => req("/api/profiles", { method: "POST", body: JSON.stringify(data) }),
   updateProfile: (id, data) => req(`/api/profiles/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteProfile: (id) => req(`/api/profiles/${id}`, { method: "DELETE" }),
+  profileFromResume: (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return uploadFile("/api/profiles/from-resume", fd);
+  },
 
   listJDs: () => req("/api/jds"),
   getJD: (id) => req(`/api/jds/${id}`),

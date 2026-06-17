@@ -7,15 +7,23 @@ export default function JDs() {
   const [postingUrl, setPostingUrl] = useState("");
   const [source, setSource] = useState("private");
   const [busy, setBusy] = useState(false);
+  const [busyLabel, setBusyLabel] = useState("");
   const [active, setActive] = useState(null);
   const [err, setErr] = useState("");
 
   useEffect(() => { refresh(); }, []);
-  async function refresh() { setList(await api.listJDs()); }
+  async function refresh() {
+    try { setList(await api.listJDs()); } catch (e) { setErr(e.message); }
+  }
+
+  const canSubmitUrl = postingUrl.trim().startsWith("http") && !raw.trim();
+  const canSubmitText = raw.trim().length > 0;
+  const canSubmit = (canSubmitUrl || canSubmitText) && !busy;
 
   async function parse() {
     setErr("");
     setBusy(true);
+    setBusyLabel(canSubmitUrl && !raw.trim() ? "Fetching URL & parsing…" : "Parsing with Claude…");
     try {
       const obj = await api.createJD({ raw_text: raw, posting_url: postingUrl, source });
       setActive(obj);
@@ -24,6 +32,7 @@ export default function JDs() {
       await refresh();
     } catch (e) { setErr(e.message); }
     setBusy(false);
+    setBusyLabel("");
   }
 
   async function remove(id) {
@@ -38,9 +47,21 @@ export default function JDs() {
       <h2>Job Descriptions</h2>
       {err && <div className="banner">{err}</div>}
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Paste a job description</h3>
+        <h3 style={{ marginTop: 0 }}>Add a job posting</h3>
         <div className="grid cols-2">
-          <div><label>Posting URL (optional)</label><input value={postingUrl} onChange={(e) => setPostingUrl(e.target.value)} /></div>
+          <div>
+            <label>Posting URL</label>
+            <input
+              value={postingUrl}
+              onChange={(e) => setPostingUrl(e.target.value)}
+              placeholder="https://jobs.company.com/… (paste URL to auto-fetch)"
+            />
+            {postingUrl && !raw.trim() && (
+              <div style={{ fontSize: 12, color: "var(--accent-2)", marginTop: 4 }}>
+                ✓ Will auto-fetch job text from this URL
+              </div>
+            )}
+          </div>
           <div>
             <label>Channel</label>
             <select value={source} onChange={(e) => setSource(e.target.value)}>
@@ -50,10 +71,22 @@ export default function JDs() {
             </select>
           </div>
         </div>
-        <label>Raw JD text</label>
-        <textarea style={{ minHeight: 240 }} value={raw} onChange={(e) => setRaw(e.target.value)} placeholder="Paste the full posting here…" />
+        <label>
+          Raw JD text{" "}
+          <span style={{ fontWeight: 400, color: "var(--muted)" }}>
+            — optional if URL provided above
+          </span>
+        </label>
+        <textarea
+          style={{ minHeight: 200 }}
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          placeholder="Paste the full posting here, or leave empty to auto-fetch from the URL above…"
+        />
         <div className="row" style={{ justifyContent: "flex-end", marginTop: 8 }}>
-          <button disabled={!raw.trim() || busy} onClick={parse}>{busy ? "Parsing with Claude…" : "Parse with Claude"}</button>
+          <button disabled={!canSubmit} onClick={parse}>
+            {busy ? busyLabel : "Parse with Claude"}
+          </button>
         </div>
       </div>
 

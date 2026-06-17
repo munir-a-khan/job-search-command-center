@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from ..db.database import get_db
 from ..db import models
 from ..schemas.models import ProfileCreate, ProfileOut
+from ..services.resume_parser import parse_resume_pdf, ResumeParseError
 
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
+
+MAX_RESUME_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
 def _to_dict(profile: ProfileCreate) -> dict:
@@ -13,6 +16,26 @@ def _to_dict(profile: ProfileCreate) -> dict:
     data["education"] = [e for e in data.get("education", [])]
     data["work_history"] = [w for w in data.get("work_history", [])]
     data["projects"] = [p for p in data.get("projects", [])]
+    return data
+
+
+@router.post("/from-resume")
+async def profile_from_resume(file: UploadFile = File(...)):
+    """Parse a resume PDF with Claude and return pre-filled profile data (does NOT save)."""
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(400, "Only PDF files are supported")
+
+    pdf_bytes = await file.read()
+    if len(pdf_bytes) > MAX_RESUME_BYTES:
+        raise HTTPException(413, "File too large — maximum 5 MB")
+    if not pdf_bytes:
+        raise HTTPException(400, "Uploaded file is empty")
+
+    try:
+        data = parse_resume_pdf(pdf_bytes)
+    except ResumeParseError as e:
+        raise HTTPException(422, str(e))
+
     return data
 
 

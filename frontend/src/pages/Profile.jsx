@@ -27,6 +27,8 @@ export default function Profile() {
   const [p, setP] = useState(emptyProfile);
   const [status, setStatus] = useState("");
   const [skillsRows, setSkillsRows] = useState([{ k: "", v: "" }]);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
 
   useEffect(() => { refresh(); }, []);
 
@@ -77,6 +79,25 @@ export default function Profile() {
     setSkillsRows([{ k: "", v: "" }]);
   }
 
+  async function handleResumeUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setUploadErr("");
+    setUploadBusy(true);
+    try {
+      const data = await api.profileFromResume(file);
+      setP({ ...emptyProfile, ...data });
+      const sk = Object.entries(data.skills || {});
+      setSkillsRows(sk.length ? sk.map(([k, v]) => ({ k, v })) : [{ k: "", v: "" }]);
+      setCurrentId(null);
+      setStatus("Resume parsed — review the fields and click Save.");
+    } catch (err) {
+      setUploadErr(err.message);
+    }
+    setUploadBusy(false);
+  }
+
   async function remove() {
     if (!currentId) return;
     if (!confirm("Delete this profile? Applications referencing it will be orphaned.")) return;
@@ -97,6 +118,33 @@ export default function Profile() {
   return (
     <>
       <h2>Profile</h2>
+
+      {/* Resume auto-fill */}
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div className="row between">
+          <div>
+            <strong>Auto-fill from resume PDF</strong>
+            <span style={{ color: "var(--muted)", fontSize: 13, marginLeft: 10 }}>
+              Claude will extract your info from your PDF and populate the form.
+            </span>
+          </div>
+          <label style={{
+            cursor: uploadBusy ? "not-allowed" : "pointer",
+            background: "var(--accent)",
+            color: "#fff",
+            padding: "6px 16px",
+            borderRadius: 6,
+            fontSize: 13,
+            opacity: uploadBusy ? 0.6 : 1,
+            whiteSpace: "nowrap",
+          }}>
+            {uploadBusy ? "Parsing resume…" : "Upload Resume PDF"}
+            <input type="file" accept=".pdf" style={{ display: "none" }} disabled={uploadBusy} onChange={handleResumeUpload} />
+          </label>
+        </div>
+        {uploadErr && <div className="banner" style={{ marginTop: 8 }}>{uploadErr}</div>}
+      </div>
+
       <div className="card row between">
         <div className="row">
           <label style={{ margin: 0 }}>Profile</label>

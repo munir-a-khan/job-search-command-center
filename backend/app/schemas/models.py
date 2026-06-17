@@ -62,7 +62,9 @@ class ProfileOut(ProfileBase):
 
 
 class JDCreate(BaseModel):
-    raw_text: str
+    # Provide raw_text, posting_url, or both.
+    # If only posting_url is given, the backend will fetch and extract the text.
+    raw_text: str = ""
     posting_url: str = ""
     source: str = "private"  # private | federal | state
 

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
@@ -17,13 +17,29 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Job Search Command Center", version="0.1.0", lifespan=lifespan)
 
+
+# ── Security headers ──────────────────────────────────────────────────────────
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Remove server fingerprint header if present
+    if "server" in response.headers:
+        del response.headers["server"]
+    return response
+
+
+# ── CORS — only allow configured origins ─────────────────────────────────────
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins or ["*"],
+    allow_origins=origins if origins else ["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "X-API-Key"],
 )
 
 auth_dep = [Depends(require_api_key)]
@@ -35,6 +51,7 @@ app.include_router(generate.router, dependencies=auth_dep)
 
 @app.get("/api/health")
 def health():
+    # Never expose key values — only booleans
     return {
         "ok": True,
         "model": settings.claude_model,

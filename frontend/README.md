@@ -1,12 +1,10 @@
 # Frontend — React + Vite + Nginx
 
-<p>
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React 18" />
-  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 5" />
-  <img src="https://img.shields.io/badge/React%20Router-6-CA4245?style=flat-square&logo=reactrouter&logoColor=white" alt="React Router 6" />
-  <img src="https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white" alt="Nginx" />
-  <img src="https://img.shields.io/badge/Node-20--alpine-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node 20 Alpine" />
-</p>
+![React 18](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)
+![Vite 5](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)
+![React Router 6](https://img.shields.io/badge/React_Router-6-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white)
+![Node 20 Alpine](https://img.shields.io/badge/Node-20_alpine-339933?style=flat-square&logo=nodedotjs&logoColor=white)
 
 A small single-page React app that drives the backend over `/api/*`. It's intentionally library-light: no Redux, no Tailwind, no UI kit — just React Router, plain CSS, and `fetch`.
 

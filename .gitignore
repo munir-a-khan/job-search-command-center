@@ -1,0 +1,37 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# data / artifacts
+data/
+backend/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# node
+node_modules/
+frontend/dist/
+.vite/
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# resume build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+build/

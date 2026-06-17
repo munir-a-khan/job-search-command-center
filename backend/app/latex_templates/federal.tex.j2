@@ -1,0 +1,113 @@
+% Federal resume template (USAJOBS-style) - target: <<jd.company|tex>> - <<jd.role|tex>>
+\documentclass[letterpaper,10pt]{article}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[english]{babel}
+\usepackage{iftex}
+\ifPDFTeX
+  \input{glyphtounicode}
+  \pdfgentounicode=1
+\else
+  \usepackage{fontspec}
+  \setmainfont{Arial}[Ligatures=NoCommon]
+\fi
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\addtolength{\oddsidemargin}{-0.58in}
+\addtolength{\evensidemargin}{-0.58in}
+\addtolength{\textwidth}{1.16in}
+\addtolength{\topmargin}{-.63in}
+\addtolength{\textheight}{1.26in}
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+\setlist[itemize]{leftmargin=0.16in, itemsep=1pt, topsep=2pt}
+\titleformat{\section}{\vspace{-3pt}\scshape\raggedright\fontsize{11.5}{13}\selectfont\bfseries}{}{0em}{}[\color{black}\titlerule \vspace{-4pt}]
+\newcommand{\resumeItem}[1]{\item #1}
+\begin{document}
+
+\begin{center}
+  {\huge <<profile.full_name|tex>>} \\ \vspace{2pt}
+  <% if profile.location %><<profile.location|tex>> $|$ <% endif %><% if profile.phone %><<profile.phone|tex>> $|$ <% endif %>\href{mailto:<<profile.email|tex>>}{<<profile.email|tex>>} \\
+  <% if profile.linkedin %>\href{<<profile.linkedin|tex>>}{<<profile.linkedin|tex>>}<% endif %><% if profile.linkedin and profile.github %> $|$ <% endif %><% if profile.github %>\href{<<profile.github|tex>>}{<<profile.github|tex>>}<% endif %>
+  \vspace{-7pt}
+\end{center}
+
+<% if profile.summary %>
+\section{\color{airforceblue}FEDERAL SUMMARY}
+<<profile.summary|tex>>
+\vspace{-6pt}
+<% endif %>
+
+<% if profile.skills %>
+\section{\color{airforceblue}CORE COMPETENCIES}
+<% set skill_values = [] %>
+<% for cat, val in profile.skills.items() %><% set _ = skill_values.append(val) %><% endfor %>
+<<skill_values | join(' $|$ ') | tex>>
+\vspace{-6pt}
+<% endif %>
+
+<% if profile.work_history %>
+\section{\color{airforceblue}WORK EXPERIENCE}
+<% for w in profile.work_history %>
+\vspace{4pt}
+\textbf{<<w.title|tex>>} \hfill \textbf{<<w.start|tex>> -- <<w.end|tex>>} \\
+\textit{<<w.company|tex>><% if w.location %>, <<w.location|tex>><% endif %>} \\
+<% if w.hours_per_week %>Hours per week: <<w.hours_per_week|tex>><% endif %><% if w.salary %> \hfill Salary: <<w.salary|tex>><% endif %> \\
+<% if w.supervisor %>Supervisor: <<w.supervisor|tex>> \hfill May contact: <<w.may_contact|tex>><% endif %>
+\vspace{-2pt}
+<% if w.bullets %>
+\begin{itemize}
+<% for b in w.bullets %>
+  \resumeItem{<<b|tex>>}
+<% endfor %>
+\end{itemize}
+<% endif %>
+<% endfor %>
+<% endif %>
+
+<% if profile.education %>
+\section{\color{airforceblue}EDUCATION}
+<% for ed in profile.education %>
+\textbf{<<ed.school|tex>>}<% if ed.end %> \hfill \textbf{Degree conferred: <<ed.end|tex>>}<% endif %> \\
+\textit{<<ed.degree|tex>>} \hfill <<ed.location|tex>> \\
+<% if ed.gpa %>GPA: <<ed.gpa|tex>><% endif %><% if ed.honors %> $|$ <<ed.honors|tex>><% endif %> \\
+<% if ed.coursework %>Relevant coursework: <<ed.coursework|tex>>.<% endif %>
+\vspace{4pt}
+<% endfor %>
+\vspace{-6pt}
+<% endif %>
+
+<% if profile.projects %>
+\section{\color{airforceblue}PROJECTS}
+<% for p in profile.projects %>
+\textbf{<<p.name|tex>>}<% if p.date %> \hfill \textbf{<<p.date|tex>>}<% endif %>
+<% if p.bullets %>
+\begin{itemize}
+<% for b in p.bullets %>
+  \resumeItem{<<b|tex>>}
+<% endfor %>
+\end{itemize}
+<% endif %>
+<% endfor %>
+\vspace{-8pt}
+<% endif %>
+
+<% if profile.skills %>
+\section{\color{airforceblue}TECHNICAL SKILLS}
+<% for cat, val in profile.skills.items() %>
+\textbf{<<cat|tex>>:} <<val|tex>><% if not loop.last %> \\<% endif %>
+<% endfor %>
+<% endif %>
+
+<% if profile.certifications %>
+\section{\color{airforceblue}CERTIFICATIONS}
+<% for c in profile.certifications %>
+\textbf{<<c|tex>>} \\
+<% endfor %>
+<% endif %>
+
+\end{document}

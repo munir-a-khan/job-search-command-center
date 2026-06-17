@@ -1,0 +1,113 @@
+% State / CalCareers / CalJOBS template - target: <<jd.company|tex>> - <<jd.role|tex>>
+\documentclass[letterpaper,11pt]{article}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[english]{babel}
+\usepackage{iftex}
+\ifPDFTeX
+  \input{glyphtounicode}
+  \pdfgentounicode=1
+\else
+  \usepackage{fontspec}
+  \setmainfont{Arial}[Ligatures=NoCommon]
+\fi
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+\titleformat{\section}{\vspace{-4pt}\scshape\raggedright\fontsize{12}{14}\selectfont\bfseries}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+\newcommand{\resumeItem}[1]{\item\normalsize{{#1 \vspace{-1pt}}}}
+\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item\begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}\textbf{\normalsize#1} & \textbf{\normalsize #2} \\\textit{\normalsize#3} & \textit{\normalsize #4} \\\end{tabular*}\vspace{-7pt}}
+\newcommand{\resumeProjectHeading}[2]{\item\begin{tabular*}{1.0\textwidth}{l@{\extracolsep{\fill}}r}\normalsize#1 & \textbf{\normalsize #2}\\\end{tabular*}\vspace{-7pt}}
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.12in, itemsep=0pt, topsep=1pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+\begin{document}
+
+\begin{center}
+    {\huge <<profile.full_name|tex>>} \\ \vspace{2pt}
+    <% if profile.phone %>{<<profile.phone|tex>>} $|$ <% endif %>\href{mailto:<<profile.email|tex>>}{<<profile.email|tex>>}<% if profile.location %> $|$ {<<profile.location|tex>>}<% endif %><% if profile.linkedin %> $|$
+    \href{<<profile.linkedin|tex>>}{<<profile.linkedin|tex>>}<% endif %><% if profile.github %> $|$
+    \href{<<profile.github|tex>>}{<<profile.github|tex>>}<% endif %>
+    \vspace{-7pt}
+\end{center}
+
+<% if profile.summary %>
+\section{\color{airforceblue}SUMMARY}
+\normalsize{<<profile.summary|tex>>}
+\vspace{-6pt}
+<% endif %>
+
+<% if profile.education %>
+\section{\color{airforceblue}EDUCATION}
+\resumeSubHeadingListStart
+<% for ed in profile.education %>
+  \resumeSubheading{<<ed.school|tex>>}{<<ed.start|tex>> - <<ed.end|tex>>}{<<ed.degree|tex>>}{<<ed.location|tex>>}
+  <% if ed.coursework %>
+  \resumeItemListStart
+    \resumeItem{\textbf{Coursework:} <<ed.coursework|tex>>}
+  \resumeItemListEnd
+  <% endif %>
+<% endfor %>
+\resumeSubHeadingListEnd
+\vspace{-10pt}
+<% endif %>
+
+<% if profile.work_history %>
+\section{\color{airforceblue}EXPERIENCE}
+\resumeSubHeadingListStart
+<% for w in profile.work_history %>
+  \resumeSubheading{<<w.title|tex>>}{<<w.start|tex>> - <<w.end|tex>>}{<<w.company|tex>>}{<<w.location|tex>>}
+  <% if w.bullets %>
+  \resumeItemListStart
+    <% for b in w.bullets %>
+    \resumeItem{<<b|tex>>}
+    <% endfor %>
+  \resumeItemListEnd
+  <% endif %>
+<% endfor %>
+\resumeSubHeadingListEnd
+\vspace{-10pt}
+<% endif %>
+
+<% if profile.projects %>
+\section{\color{airforceblue}PROJECTS \& SUPPORT WORK}
+\resumeSubHeadingListStart
+<% for p in profile.projects %>
+  \resumeProjectHeading{\textbf{<<p.name|tex>>} $|$ <<p.focus|tex>>}{<<p.date|tex>>}
+  <% if p.bullets %>
+  \resumeItemListStart
+    <% for b in p.bullets %>
+    \resumeItem{<<b|tex>>}
+    <% endfor %>
+  \resumeItemListEnd
+  <% endif %>
+<% endfor %>
+\resumeSubHeadingListEnd
+\vspace{-10pt}
+<% endif %>
+
+<% if profile.skills %>
+\section{\color{airforceblue}SKILLS}
+\begin{itemize}[leftmargin=0in, label={}]
+  \normalsize{\item{
+<% for cat, val in profile.skills.items() %>
+    \textbf{<<cat|tex>>:} <<val|tex>><% if not loop.last %> \\<% endif %>
+<% endfor %>
+  }}
+\end{itemize}
+\vspace{-16pt}
+<% endif %>
+
+\end{document}

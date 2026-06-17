@@ -99,8 +99,8 @@ export default function ApplicationDetail() {
           </div>
           {resume.warnings?.length > 0 && <div className="banner">Warnings: {resume.warnings.join(" • ")}</div>}
           <div className="row" style={{ marginTop: 8 }}>
-            <a href={api.fileUrl(resume.pdf_path)} target="_blank" rel="noreferrer"><button className="secondary">Download PDF</button></a>
-            <a href={api.fileUrl(resume.tex_path)} target="_blank" rel="noreferrer"><button className="secondary">Download .tex</button></a>
+            <button className="secondary" onClick={() => api.download(resume.pdf_path)}>Download PDF</button>
+            <button className="secondary" onClick={() => api.download(resume.tex_path)}>Download .tex</button>
           </div>
           <h3>Tailored summary</h3>
           <p>{resume.summary}</p>
@@ -118,7 +118,7 @@ export default function ApplicationDetail() {
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Cover letter</h3>
           <pre className="preview">{cover.body}</pre>
-          <a href={api.fileUrl(cover.path)} target="_blank" rel="noreferrer"><button className="secondary">Download .txt</button></a>
+          <button className="secondary" onClick={() => api.download(cover.path)}>Download .txt</button>
         </div>
       )}
 

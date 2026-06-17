@@ -9,6 +9,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-sqlite:////data/app.db}
       CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-4-6}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost,http://localhost:8080}
+      API_KEY: ${API_KEY:-}
     volumes:
       - ./data:/data
     ports:

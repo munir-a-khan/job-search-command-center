@@ -1,10 +1,26 @@
 const base = "";
+const API_KEY_STORAGE = "jscc_api_key";
+
+export function getApiKey() {
+  try { return localStorage.getItem(API_KEY_STORAGE) || ""; } catch { return ""; }
+}
+export function setApiKey(v) {
+  try { localStorage.setItem(API_KEY_STORAGE, v || ""); } catch {}
+}
+
+function authHeaders() {
+  const k = getApiKey();
+  return k ? { "X-API-Key": k } : {};
+}
 
 async function req(path, opts = {}) {
   const res = await fetch(base + path, {
-    headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+    headers: { "Content-Type": "application/json", ...authHeaders(), ...(opts.headers || {}) },
     ...opts,
   });
+  if (res.status === 401) {
+    throw new Error("401: API key required or invalid. Set it from the top-right field.");
+  }
   if (!res.ok) {
     const text = await res.text();
     let msg = text;
@@ -13,6 +29,25 @@ async function req(path, opts = {}) {
   }
   if (res.status === 204) return null;
   return res.json();
+}
+
+async function downloadFile(path) {
+  const res = await fetch(`/api/generate/file?path=${encodeURIComponent(path)}`, {
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) throw new Error(`${res.status}: download failed`);
+  const blob = await res.blob();
+  const cd = res.headers.get("Content-Disposition") || "";
+  const m = cd.match(/filename="?([^";]+)"?/);
+  const name = m ? m[1] : path.split("/").pop();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 export const api = {
@@ -38,5 +73,5 @@ export const api = {
 
   genResume: (data) => req("/api/generate/resume", { method: "POST", body: JSON.stringify(data) }),
   genCover: (data) => req("/api/generate/cover-letter", { method: "POST", body: JSON.stringify(data) }),
-  fileUrl: (path) => `/api/generate/file?path=${encodeURIComponent(path)}`,
+  download: downloadFile,
 };

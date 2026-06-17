@@ -30,12 +30,14 @@ You can swap or extend the LaTeX templates in `backend/app/latex_templates/` wit
 
 ## Quick start
 
-1. Copy `.env.example` → `.env` and set `ANTHROPIC_API_KEY`.
+1. Copy `.env.example` → `.env` and set:
+   - `ANTHROPIC_API_KEY` — Claude API key.
+   - `API_KEY` — anything random (e.g. `openssl rand -hex 32`); the backend rejects any request without `X-API-Key: <this value>`. Leave empty in dev to disable auth.
 2. Bring it up:
    ```bash
    docker compose up --build
    ```
-3. Open <http://localhost:8080>. The API is on <http://localhost:8000> with docs at `/docs`.
+3. Open <http://localhost:8080>. Paste your `API_KEY` into the top bar; it's saved in localStorage. The API is on <http://localhost:8000> with docs at `/docs`.
 
 The first build downloads Tectonic and warms its cache; expect 3–5 minutes the first time.
 

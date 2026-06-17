@@ -12,7 +12,7 @@
   \pdfgentounicode=1
 \else
   \usepackage{fontspec}
-  \setmainfont{Arial}[Ligatures=NoCommon]
+  \IfFontExistsTF{Arial}{\setmainfont{Arial}[Ligatures=NoCommon]}{\setmainfont{Liberation Sans}[Ligatures=NoCommon]}
 \fi
 \definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
 \addtolength{\oddsidemargin}{-0.58in}

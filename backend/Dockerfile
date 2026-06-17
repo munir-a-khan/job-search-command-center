@@ -6,6 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl ca-certificates fontconfig wget xz-utils \
+      fonts-liberation fonts-dejavu-core \
+    && fc-cache -fv \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -L https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.15.0/tectonic-0.15.0-x86_64-unknown-linux-musl.tar.gz \

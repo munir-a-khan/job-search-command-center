@@ -4,6 +4,7 @@ import Profile from "./pages/Profile.jsx";
 import JDs from "./pages/JDs.jsx";
 import Applications from "./pages/Applications.jsx";
 import ApplicationDetail from "./pages/ApplicationDetail.jsx";
+import ApiKeyBar from "./components/ApiKeyBar.jsx";
 
 const navStyle = ({ isActive }) => (isActive ? "active" : "");
 
@@ -19,16 +20,19 @@ export default function App() {
           <NavLink to="/applications" className={navStyle}>Applications</NavLink>
         </nav>
       </aside>
-      <main className="main">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/jds" element={<JDs />} />
-          <Route path="/applications" element={<Applications />} />
-          <Route path="/applications/:id" element={<ApplicationDetail />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+      <div>
+        <ApiKeyBar />
+        <main className="main">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/jds" element={<JDs />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/applications/:id" element={<ApplicationDetail />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

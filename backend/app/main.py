@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db.database import Base, engine
 from .db import models  # noqa: F401  ensures models register
 from .routers import applications, generate, jds, profiles
+from .security import require_api_key
 
 
 @asynccontextmanager
@@ -25,10 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(profiles.router)
-app.include_router(jds.router)
-app.include_router(applications.router)
-app.include_router(generate.router)
+auth_dep = [Depends(require_api_key)]
+app.include_router(profiles.router, dependencies=auth_dep)
+app.include_router(jds.router, dependencies=auth_dep)
+app.include_router(applications.router, dependencies=auth_dep)
+app.include_router(generate.router, dependencies=auth_dep)
 
 
 @app.get("/api/health")
@@ -37,4 +39,5 @@ def health():
         "ok": True,
         "model": settings.claude_model,
         "claude_configured": bool(settings.anthropic_api_key),
+        "auth_required": bool(settings.api_key),
     }

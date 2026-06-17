@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:////data/app.db"
     data_dir: str = "/data"
     cors_origins: str = "http://localhost:5173,http://localhost:3000,http://localhost"
+    api_key: str = ""  # if empty, auth is disabled (dev mode)
 
 
 settings = Settings()
